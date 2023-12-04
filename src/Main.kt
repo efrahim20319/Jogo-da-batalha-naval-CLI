@@ -314,6 +314,8 @@ fun insereNavio(tabuleiro: Array<Array<Char?>>, numLinhas: Int, numColunas: Int,
     return false
 }
 
+fun insereNavioSimples(tabuleiro: Array<Array<Char?>>, numLinhas: Int, numColunas: Int, dimensao: Int) = insereNavio(tabuleiro, numLinhas, numColunas, "E", dimensao)
+
 
 fun criaLegendaHorizontal(numColunas: Int) : String {
     var count = 0
@@ -463,7 +465,8 @@ fun main() {
     val fronteiras = gerarCoordenadasFronteira(arrayVazio, 1, 1, "E", 3)
     insereNavio(arrayVazio, 1,2,"E",3)
     insereNavio(arrayVazio, 3,5,"S",3)
-    insereNavio(arrayVazio, 3,3,"N",2)
+    insereNavio(arrayVazio, 5,3,"O",2)
+    insereNavioSimples(arrayVazio, 3, 1, 1)
     for (index in arrayVazio) {
         for (zinx in index) {
             print(if (zinx == null) '~' else zinx)
