@@ -3,6 +3,14 @@ const val NOT_IMPLEMENTED = 501
 const val SUCCESS = 200
 const val REDIRECTED = 300
 const val REDIRECTION_VALUE = -1
+var numLinhas = -1
+var numColunas = -1
+var tabuleiroHumano: Array<Array<Char?>> = emptyArray()
+var tabuleiroComputador: Array<Array<Char?>> = emptyArray()
+
+var tabuleiroPalpitesDoHumano: Array<Array<Char?>> = emptyArray()
+var tabuleiroPalpitesDoComputador: Array<Array<Char?>> = emptyArray()
+
 
 fun dimensoesValidas(numLinhas: Int, numColunas: Int, dimensao: Int) = numLinhas == numColunas &&
         numLinhas == dimensao
@@ -72,8 +80,8 @@ fun configuracaoNumNavios (dimensao: Int): String {
     }
 }
 
-fun calculaNumNavios(numLinhas: Int, numColunas: Int): Array<Int?> {
-    val arrayRetorno = arrayOfNulls<Int>(4)
+fun calculaNumNavios(numLinhas: Int, numColunas: Int): Array<Int> {
+    val arrayRetorno = Array(4) { 0 }
     var configuracaoArrayRetorno = ""
     if (tamanhoTabuleiroValido(numLinhas, numColunas)) {
         configuracaoArrayRetorno = configuracaoNumNavios(numLinhas) // Ou numColunas, nao importa
@@ -339,14 +347,95 @@ fun navioCompleto(tabuleiro: Array<Array<Char?>>, numLinhas: Int, numColunas: In
     return false
 }
 
-//fun obtemMapa(): Boolean {
-//    val dimensaoTabuleiro = tabuleiro.size
-//    val mapa = Array(dimensaoTabuleiro) { Array(dimensaoTabuleiro) { "" } }
-//    for (linha in 0 until tabuleiro.size) {
-//
-//
-//    }
-//}
+fun orientacaoNavio(tabuleiro: Array<Array<Char?>>, numLinhas: Int, numColunas: Int): String {
+    val dimensao = tabuleiro[numLinhas - 1][numColunas - 1]!!.code - 48
+    val posicoesEste = gerarCoordenadasNavio(tabuleiro, numLinhas, numColunas, "E", dimensao)
+    val posicoesOeste = gerarCoordenadasNavio(tabuleiro, numLinhas, numColunas, "O", dimensao)
+    val posicoesNorte = gerarCoordenadasNavio(tabuleiro, numLinhas, numColunas, "N", dimensao)
+    val posicoesSul = gerarCoordenadasNavio(tabuleiro, numLinhas, numColunas, "S", dimensao)
+    val valorPosicao = tabuleiro[numLinhas - 1][numColunas - 1]
+    var count: Int
+    val arrOrientacoes = arrayOf("E", "O", "N", "S")
+    var countPosicoes = 0
+    for (posicoes in arrayOf(posicoesEste, posicoesNorte, posicoesOeste, posicoesSul)) {
+        count = 0
+        for (posicao in posicoes) {
+            if (tabuleiro[posicao.first - 1][posicao.second - 1] == valorPosicao){
+                count++
+            }
+            if (count == dimensao) {
+                return arrOrientacoes[countPosicoes]
+            }
+        }
+        countPosicoes++
+    }
+    return ""
+}
+
+fun lancarTiro(tabuleiroRealAdversario: Array<Array<Char?>>, tabuleiroPalpitesJogador: Array<Array<Char?>>, coordenada: Pair<Int,Int>): String {
+    val valorTabuleiroReal = tabuleiroRealAdversario[coordenada.first - 1][coordenada.second - 1]
+    val tipoNavio = when(valorTabuleiroReal) {
+        '1' -> "Submarino."
+        '2' -> "contra-torpedeiro."
+        '3' -> "navio-tanque."
+        '4' -> "porta-avioes."
+        null -> "Agua."
+        else -> "desconhecido."
+    }
+    tabuleiroPalpitesJogador[coordenada.first - 1][coordenada.second - 1] = 'X'
+    if (tipoNavio == "Agua.") {
+        return tipoNavio
+    }
+    return "Tiro num $tipoNavio"
+}
+
+fun geraTiroComputador(tabuleiroPalpitesComputador: Array<Array<Char?>>): Pair<Int, Int> {
+    val dimensaoTabuleiro = tabuleiroPalpitesComputador.size
+    var linhaAleatoria = (1..dimensaoTabuleiro).random()
+    var colunaAleatoria = (1..dimensaoTabuleiro).random()
+    while (tabuleiroPalpitesComputador[linhaAleatoria - 1][colunaAleatoria - 1] != null) {
+        linhaAleatoria = (1..dimensaoTabuleiro).random()
+        colunaAleatoria = (1..dimensaoTabuleiro).random()
+    }
+    return Pair(linhaAleatoria, colunaAleatoria)
+}
+
+fun contaNaviosDeDimensao(tabuleiro: Array<Array<Char?>>, dimensao: Int): Int {
+    val dimensaoTabuleiro = tabuleiro.size
+    var coordenadasAhIgnorar = emptyArray<Pair<Int, Int>>()
+    var valorPosicao:Char? = ' '
+    var countNavios = 0
+    var orientacaoNavio = ""
+    for (countLinha in 1..dimensaoTabuleiro) {
+        for (countColuna in 1..dimensaoTabuleiro) {
+            valorPosicao = tabuleiro[countLinha - 1][countColuna - 1] ?: '0'
+            if (!(Pair(countLinha, countColuna) in coordenadasAhIgnorar)) {
+                if ("$valorPosicao".toInt() == dimensao && navioCompleto(tabuleiro, countLinha, countColuna)) {
+                    countNavios++
+                    if ("$valorPosicao".toInt() != 1) {
+                        orientacaoNavio = orientacaoNavio(tabuleiro, countLinha, countColuna)
+                        coordenadasAhIgnorar = juntarCoordenadas(
+                            coordenadasAhIgnorar,
+                            gerarCoordenadasNavio(tabuleiro, countLinha, countColuna, orientacaoNavio, dimensao)
+                        )
+                    }
+                }
+            }
+        }
+    }
+    return countNavios
+}
+
+fun venceu(tabuleiro: Array<Array<Char?>>): Boolean {
+    val dimensaoTabuleiro = tabuleiro.size
+    val numNavios = calculaNumNavios(dimensaoTabuleiro, dimensaoTabuleiro)
+    for (index in 0 until  numNavios.size) {
+        if (contaNaviosDeDimensao(tabuleiro, index + 1) != numNavios[index]) {
+            return false
+        }
+    }
+    return true
+}
 
 fun retornaPosicaoSeDisponivel(tabuleiro: Array<Array<Char?>>, posicao: Pair<Int, Int>): Pair<Int, Int> {
     if (estaLivre(tabuleiro, arrayOf(posicao))) return posicao
@@ -452,7 +541,7 @@ fun obtemMapa(tabuleiro: Array<Array<Char?>>, tabuleiroReal: Boolean): Array<Str
                             '2' -> '\u2082'
                             '3' -> '\u2083'
                             '4' -> '\u2084'
-                            else -> null
+                            else -> ' '
                         }
                     }
                 }
@@ -558,42 +647,37 @@ fun printlnArray(arr: Array<Int?>) {
 
 fun main() {
 
-    val arrayVazio = criaTabuleiroVazio(5,5)
-//    insereNavio(arrayVazio, 1,4,"O",1)
-//    insereNavio(arrayVazio, 5,2,"O",2)
-//    insereNavio(arrayVazio, 4,3,"N",3)
-//    insereNavioSimples(arrayVazio, 3, 1, 1)
-    insereNavio(arrayVazio, 2,5,"S", 2)
-    insereNavio(arrayVazio, 2,2,"S", 1)
-    insereNavio(arrayVazio, 5,1,"S", 1)
-    insereNavio(arrayVazio, 5,3,"E", 3)
-    arrayVazio[4][4] = null
-    arrayVazio[1][4] = null
-    println(navioCompleto(arrayVazio, 5, 4))
-    for (index in arrayVazio) {
-        for (zinx in index) {
-            print(zinx ?: '~')
-            print(" ")
-        }
-        println()
-    }
-
-
-    for (linha in obtemMapa(arrayVazio, true)) {
-        println(linha)
-    }
-
-//    var menuAtual: Int? = menuPrincipal()
-//     while(true) {
-//         menuAtual = readln().toIntOrNull()
-//         menuAtual = when(menuAtual) {
-//             1 -> menuDefinirTabuleiro()
-//             2 -> ausenciaDeImplementacao()
-//             3 -> ausenciaDeImplementacao()
-//             4 -> ausenciaDeImplementacao()
-//             0 -> return
-//             else -> opcaoInvalida()
-//         }
-//         if (menuAtual == SUCCESS || menuAtual == REDIRECTED) { menuPrincipal() }
-//     }
+//    val tabuleiroHumano = criaTabuleiroVazio(5,5)
+//    val tabuleiroComputador = criaTabuleiroVazio(5,5)
+////    insereNavio(tabuleiroHumano, 1,4,"O",1)
+////    insereNavio(tabuleiroHumano, 5,2,"O",2)
+////    insereNavio(tabuleiroHumano, 4,3,"N",3)
+////    insereNavioSimples(tabuleiroHumano, 3, 1, 1)
+//    insereNavio(tabuleiroHumano, 2,5,"S", 2)
+//    insereNavio(tabuleiroHumano, 3,3,"S", 1)
+//    insereNavio(tabuleiroHumano, 5,1,"S", 1)
+//    insereNavio(tabuleiroHumano, 5,3,"E", 3)
+//    insereNavio(tabuleiroHumano, 1,1,"S", 3)
+////    tabuleiroHumano[4][4] = null
+////    tabuleiroHumano[1][4] = null
+//    println(navioCompleto(tabuleiroHumano, 2, 2))
+//    for (linha in obtemMapa(tabuleiroHumano, true)) {
+//        println(linha)
+//    }
+//    println(lancarTiro(tabuleiroHumano, tabuleiroComputador, Pair(2,1)))
+//    println(contaNaviosDeDimensao(tabuleiroHumano, 2))
+//
+////    var menuAtual: Int? = menuPrincipal()
+////     while(true) {
+////         menuAtual = readln().toIntOrNull()
+////         menuAtual = when(menuAtual) {
+////             1 -> menuDefinirTabuleiro()
+////             2 -> ausenciaDeImplementacao()
+////             3 -> ausenciaDeImplementacao()
+////             4 -> ausenciaDeImplementacao()
+////             0 -> return
+////             else -> opcaoInvalida()
+////         }
+////         if (menuAtual == SUCCESS || menuAtual == REDIRECTED) { menuPrincipal() }
+////     }
 }
