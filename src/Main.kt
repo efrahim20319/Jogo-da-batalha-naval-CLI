@@ -89,7 +89,7 @@ fun calculaNumNavios(numLinhas: Int, numColunas: Int): Array<Int> {
     val arrayRetorno = Array(4) { 0 }
     var configuracaoArrayRetorno = ""
     if (tamanhoTabuleiroValido(numLinhas, numColunas)) {
-        configuracaoArrayRetorno = configuracaoNumNavios(numLinhas) // Ou numColunas, nao importa
+        configuracaoArrayRetorno = configuracaoNumNavios(numLinhas) // Ou numColunas, nao importa - 2000
         for (index in 0..configuracaoArrayRetorno.length - 1) {
             arrayRetorno[index] = "${configuracaoArrayRetorno[index]}".toInt()
         }
