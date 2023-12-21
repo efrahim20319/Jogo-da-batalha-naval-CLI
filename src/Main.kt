@@ -478,7 +478,7 @@ fun contarNaviosDeDimensao(tabuleiro: Array<Array<Char?>>, dimensao: Int): Int {
     for (countLinha in 1..dimensaoTabuleiro) {
         for (countColuna in 1..dimensaoTabuleiro) {
             valorPosicao = tabuleiro[countLinha - 1][countColuna - 1] ?: '0'
-            if (!(Pair(countLinha, countColuna) in coordenadasAhIgnorar)) {
+            if (!(Pair(countLinha, countColuna) in coordenadasAhIgnorar) && valorPosicao != 'X') {
                 if ("$valorPosicao".toInt() == dimensao) { //navioCompleto(tabuleiro, countLinha, countColuna)
                     orientacaoNavio = orientacaoNavio(tabuleiro, countLinha, countColuna)
                     coordenadasDoNavio = gerarCoordenadasNavio(tabuleiro, countLinha, countColuna, orientacaoNavio, dimensao)
@@ -758,8 +758,6 @@ fun menuDefinirTabuleiro(): Int {
     if (respostaVerMapaComputador == "S") {
         mostraMapa(tabuleiroComputador, true)
     }
-    println(contarNaviosDeDimensao(tabuleiroHumano, 1))
-    println(contarNaviosDeDimensao(tabuleiroComputador, 1))
     return SUCCESS
 }
 
@@ -788,10 +786,22 @@ fun menuJogar(): Int {
         }
         alvoAtingido = lancarTiro(tabuleiroComputador, tabuleiroPalpitesDoHumano, coordenadasProcessadas!!)
         println(">>> HUMANO >>>${alvoAtingido}${if (navioCompleto(tabuleiroPalpitesDoHumano, coordenadasProcessadas.first, coordenadasProcessadas.second)) " Navio ao fundo!" else ""}")
+        if (venceu(tabuleiroPalpitesDoHumano)) {
+            println("PARABENS! Venceu o jogo")
+            println("Prima enter para voltar ao menu principal")
+            readln()
+            return SUCCESS
+        }
         alvoAtingidoComputador = geraTiroComputador(tabuleiroPalpitesDoComputador)
         println("Computador lancou tiro para a posicao (${alvoAtingidoComputador.first}, ${alvoAtingidoComputador.second})")
         alvoAtingido = lancarTiro(tabuleiroHumano, tabuleiroPalpitesDoComputador, alvoAtingidoComputador)
         println(">>> COMPUTADOR >>>${alvoAtingido}${if (navioCompleto(tabuleiroPalpitesDoComputador, alvoAtingidoComputador.first, alvoAtingidoComputador.second)) " Navio ao fundo!" else ""}")
+        if (venceu(tabuleiroPalpitesDoComputador)) {
+            println("PARABENS! Venceu o jogo")
+            println("Prima enter para voltar ao menu principal")
+            readln()
+            return SUCCESS
+        }
     }
 }
 
