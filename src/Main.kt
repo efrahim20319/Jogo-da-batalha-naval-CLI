@@ -755,7 +755,7 @@ fun menuDefinirTabuleiro(): Int {
         count++
     }
     preencheTabuleiroComputador(tabuleiroComputador, confirguracaoNavio)
-    println("Pretende ver o mapa gerado pelo computador? (S/N)")
+    println("Pretende ver o mapa gerado para o Computador? (S/N)")
     var respostaVerMapaComputador = readln()
     if (respostaVerMapaComputador == "S") {
         mostraMapa(tabuleiroComputador, true)
@@ -777,7 +777,7 @@ fun menuJogar(tabuleiroDefinido: Boolean): Int {
         var alvoAtingidoComputador: Pair<Int, Int>
         while (!coordenadaValida) {
             mostraMapa(tabuleiroPalpitesDoHumano, false)
-            println("Insira a posição em que pretende atingir")
+            println("Indique a posição que pretende atingir")
             println("Coordenadas? (ex: 6,G)")
             coordenadas = readln()
             coordenadaValida = coordenadaValida(coordenadas, dimensaoTabuleiro, dimensaoTabuleiro)
@@ -808,6 +808,8 @@ fun menuJogar(tabuleiroDefinido: Boolean): Int {
             readln()
             return SUCCESS
         }
+        println("Prima enter para continuar")
+        readln()
     }
 }
 
