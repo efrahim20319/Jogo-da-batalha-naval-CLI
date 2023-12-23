@@ -763,7 +763,11 @@ fun menuDefinirTabuleiro(): Int {
     return SUCCESS
 }
 
-fun menuJogar(): Int {
+fun menuJogar(tabuleiroDefinido: Boolean): Int {
+    if (!tabuleiroDefinido) {
+        printErroTabuleiroNaoDefinido()
+        return REDIRECTED
+    }
     while (true) {
         var coordenadas: String
         var coordenadaValida = false
@@ -807,7 +811,11 @@ fun menuJogar(): Int {
     }
 }
 
-fun menuGravarJogo(): Int {
+fun menuGravarJogo(tabuleiroDefinido: Boolean): Int {
+    if (!tabuleiroDefinido) {
+        printErroTabuleiroNaoDefinido()
+        return REDIRECTED
+    }
     println("Introduza o nome do ficheiro (ex: jogo.txt)")
     val nomeDoFicheiro = readln()
     val dimensao = tabuleiroHumano.size
@@ -821,7 +829,7 @@ fun menuLerJogo(): Int {
     val nomeDoFicheiro = readln()
     val tabuleiros = arrayOf(tabuleiroHumano, tabuleiroPalpitesDoHumano, tabuleiroComputador, tabuleiroPalpitesDoComputador)
     for (countTabuleiro in 0 until tabuleiros.size) {
-        tabuleiros[countTabuleiro] = lerJogo(nomeDoFicheiro, countTabuleiro+1)
+        tabuleiros[countTabuleiro] = lerJogo(nomeDoFicheiro, countTabuleiro + 1)
     }
     val dimensao = tabuleiroHumano.size
     println("Tabuleiro ${dimensao}x${dimensao} lido com sucesso")
@@ -924,51 +932,27 @@ fun mostraMapa(tabuleiro: Array<Array<Char?>>, tabuleiroReal: Boolean) {
     }
 }
 
-fun printlnArray(arr: Array<Int?>) {
-    for (index in arr) {
-        print(index)
-    }
-    println()
+fun printErroTabuleiroNaoDefinido() {
+    println("!!! Tem que primeiro definir o tabuleiro do jogo, tente novamente")
 }
 
 fun main() {
-//    var tabuleiro = criaTabuleiroVazio(5,5)
-//    insereNavio(tabuleiro, 1,5,"S", 3)
-//    insereNavio(tabuleiro, 3,1,"E", 2)
-//    insereNavio(tabuleiro, 5,1,"E", 1)
-//    tabuleiro[3][4] = null
-//    mostraMapa(tabuleiro, true)
-//    var completos = retornaCoordenadasDeTodosNaviosCompletos(tabuleiro)
-//    println(completos.size)
-
-//    var arquivo =  File("foo.txt").readLines()
-//    for (linha in arquivo) {
-//        println(linha)
-//    }
-//
-//    var escreveFicheiro = File("foo.txt").printWriter()
-//
-//    escreveFicheiro.println("Nice to meet you dude, you are amazing")
-//
-//    escreveFicheiro.close()
-
-
     var menuAtual: Int? = menuPrincipal()
+    var tabuleiroDefinido = false
     while (true) {
         menuAtual = readln().toIntOrNull()
         menuAtual = when (menuAtual) {
             1 -> menuDefinirTabuleiro()
-            2 -> menuJogar()
-            3 -> menuGravarJogo()
+            2 -> menuJogar(tabuleiroDefinido)
+            3 -> menuGravarJogo(tabuleiroDefinido)
             4 -> menuLerJogo()
-            0 -> {
-//                gravarJogo("bar.txt", tabuleiroHumano, tabuleiroPalpitesDoHumano, tabuleiroComputador, tabuleiroPalpitesDoComputador)
-                return
-            }
-
+            0 -> return
             else -> opcaoInvalida()
         }
         if (menuAtual == SUCCESS || menuAtual == REDIRECTED) {
+            if (menuAtual == SUCCESS) {
+                tabuleiroDefinido = true
+            }
             menuPrincipal()
         }
     }
