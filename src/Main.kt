@@ -1,3 +1,5 @@
+import java.io.File
+
 val abecedarioASCII = 65..90
 const val NOT_IMPLEMENTED = 501
 const val SUCCESS = 200
@@ -805,6 +807,28 @@ fun menuJogar(): Int {
     }
 }
 
+fun menuGravarJogo(): Int {
+    println("Introduza o nome do ficheiro (ex: jogo.txt)")
+    val nomeDoFicheiro = readln()
+    val dimensao = tabuleiroHumano.size
+    gravarJogo(nomeDoFicheiro, tabuleiroHumano, tabuleiroPalpitesDoHumano, tabuleiroComputador, tabuleiroPalpitesDoComputador)
+    println("Tabuleiro ${dimensao}x${dimensao} gravado com sucesso")
+    return SUCCESS
+}
+
+fun menuLerJogo(): Int {
+    println("Introduza o nome do ficheiro (ex: jogo.txt)")
+    val nomeDoFicheiro = readln()
+    val tabuleiros = arrayOf(tabuleiroHumano, tabuleiroPalpitesDoHumano, tabuleiroComputador, tabuleiroPalpitesDoComputador)
+    for (countTabuleiro in 0 until tabuleiros.size) {
+        tabuleiros[countTabuleiro] = lerJogo(nomeDoFicheiro, countTabuleiro+1)
+    }
+    val dimensao = tabuleiroHumano.size
+    println("Tabuleiro ${dimensao}x${dimensao} lido com sucesso")
+    mostraMapa(tabuleiroHumano, true)
+    return SUCCESS
+}
+
 fun tipoNavioAtingido(tabuleiro: Array<Array<Char?>>, coordenada: Pair<Int, Int>): String {
     val valorTabuleiro = tabuleiro[coordenada.first - 1][coordenada.second - 1]
     val tipoNavio = when (valorTabuleiro) {
@@ -818,12 +842,80 @@ fun tipoNavioAtingido(tabuleiro: Array<Array<Char?>>, coordenada: Pair<Int, Int>
     return tipoNavio
 }
 
-fun lerJogo(nomeDoFicheiro: String, TipoDoTabuleiro: Int): Array<Array<Char?>> {
-    return emptyArray()
+fun lerJogo(nomeDoFicheiro: String, tipoDoTabuleiro: Int): Array<Array<Char?>> {
+    val linhasFicheiro = File(nomeDoFicheiro).readLines()
+    val dimensao = "${linhasFicheiro[0][0]}".toInt()
+    val primeiraLinhasDosTabuleiros = arrayOf(5, (5) + (dimensao + 3) * 1, (5) + (dimensao + 3) * 2, (5) + (dimensao + 3) * 3)
+    tabuleiroHumano = criaTabuleiroVazio(dimensao, dimensao)
+    tabuleiroPalpitesDoHumano = criaTabuleiroVazio(dimensao, dimensao)
+    tabuleiroComputador = criaTabuleiroVazio(dimensao, dimensao)
+    tabuleiroPalpitesDoComputador = criaTabuleiroVazio(dimensao, dimensao)
+    val tabuleiros = arrayOf(tabuleiroHumano, tabuleiroPalpitesDoHumano, tabuleiroComputador, tabuleiroPalpitesDoComputador)
+    var count = 0
+    var countLinha: Int
+    var countColuna: Int
+    for (primeiraLinhaDeTabuleiro in primeiraLinhasDosTabuleiros) {
+        countLinha = 0
+        for (linha in primeiraLinhaDeTabuleiro until primeiraLinhaDeTabuleiro + dimensao) {
+            countColuna = 0
+            for (coluna in linhasFicheiro[linha - 1]) {
+                if (coluna == ',') {
+                    countColuna++
+                }
+                if (coluna.isDigit() || coluna == 'X') {
+                    tabuleiros[count][countLinha][countColuna] = coluna
+                }
+            }
+            countLinha++
+        }
+        count++
+    }
+    return tabuleiros[tipoDoTabuleiro - 1]
 }
 
 fun gravarJogo(nomeDoFicheiro: String, tabuleiroRealHumano: Array<Array<Char?>>, tabuleiroPalpitesHumano: Array<Array<Char?>>, tabuleiroRealComputador: Array<Array<Char?>>, tabuleiroPalpitesComputador: Array<Array<Char?>>) {
-
+    val dimensao = tabuleiroRealHumano.size
+    val escreveFicheiro = File(nomeDoFicheiro).printWriter()
+    val tabuleirosJogador = arrayOf(tabuleiroRealHumano, tabuleiroPalpitesHumano)
+    val tabuleirosComputador = arrayOf(tabuleiroRealComputador, tabuleiroPalpitesComputador)
+    val opcoesTabuleiro = arrayOf("Real", "Palpites")
+    var count = 0
+    escreveFicheiro.println("$dimensao,$dimensao")
+    escreveFicheiro.println()
+    for (tabuleiro in tabuleirosJogador) {
+        escreveFicheiro.println("Jogador")
+        escreveFicheiro.println(opcoesTabuleiro[count])
+        for (countLinha in 0 until tabuleiro.size) {
+            for (countColuna in 0 until tabuleiro.size) {
+                escreveFicheiro.print((tabuleiro[countLinha][countColuna]) ?: (""))
+                if (countColuna != tabuleiro.size - 1) {
+                    escreveFicheiro.print(",")
+                }
+            }
+            escreveFicheiro.println()
+        }
+        count++
+        escreveFicheiro.println()
+    }
+    count = 0
+    for (tabuleiro in tabuleirosComputador) {
+        escreveFicheiro.println("Computador")
+        escreveFicheiro.println(opcoesTabuleiro[count])
+        for (countLinha in 0 until tabuleiro.size) {
+            for (countColuna in 0 until tabuleiro.size) {
+                escreveFicheiro.print((tabuleiro[countLinha][countColuna]) ?: (""))
+                if (countColuna != tabuleiro.size - 1) {
+                    escreveFicheiro.print(",")
+                }
+            }
+            escreveFicheiro.println()
+        }
+        if (count != tabuleirosComputador.size - 1) {
+            escreveFicheiro.println()
+        }
+        count++
+    }
+    escreveFicheiro.close()
 }
 
 fun mostraMapa(tabuleiro: Array<Array<Char?>>, tabuleiroReal: Boolean) {
@@ -849,15 +941,31 @@ fun main() {
 //    var completos = retornaCoordenadasDeTodosNaviosCompletos(tabuleiro)
 //    println(completos.size)
 
+//    var arquivo =  File("foo.txt").readLines()
+//    for (linha in arquivo) {
+//        println(linha)
+//    }
+//
+//    var escreveFicheiro = File("foo.txt").printWriter()
+//
+//    escreveFicheiro.println("Nice to meet you dude, you are amazing")
+//
+//    escreveFicheiro.close()
+
+
     var menuAtual: Int? = menuPrincipal()
     while (true) {
         menuAtual = readln().toIntOrNull()
         menuAtual = when (menuAtual) {
             1 -> menuDefinirTabuleiro()
             2 -> menuJogar()
-            3 -> ausenciaDeImplementacao()
-            4 -> ausenciaDeImplementacao()
-            0 -> return
+            3 -> menuGravarJogo()
+            4 -> menuLerJogo()
+            0 -> {
+//                gravarJogo("bar.txt", tabuleiroHumano, tabuleiroPalpitesDoHumano, tabuleiroComputador, tabuleiroPalpitesDoComputador)
+                return
+            }
+
             else -> opcaoInvalida()
         }
         if (menuAtual == SUCCESS || menuAtual == REDIRECTED) {
