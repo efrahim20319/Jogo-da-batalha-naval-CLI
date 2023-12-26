@@ -793,7 +793,7 @@ fun menuJogar(tabuleiroDefinido: Boolean): Int {
         alvoAtingido = lancarTiro(tabuleiroComputador, tabuleiroPalpitesDoHumano, coordenadasProcessadas!!)
         println(">>> HUMANO >>>${alvoAtingido}${if (navioCompleto(tabuleiroPalpitesDoHumano, coordenadasProcessadas.first, coordenadasProcessadas.second)) " Navio ao fundo!" else ""}")
         if (venceu(tabuleiroPalpitesDoHumano)) {
-            println("PARABENS! Venceu o jogo")
+            println("PARABENS! Venceu o jogo!")
             println("Prima enter para voltar ao menu principal")
             readln()
             return SUCCESS
@@ -938,23 +938,21 @@ fun printErroTabuleiroNaoDefinido() {
     println("!!! Tem que primeiro definir o tabuleiro do jogo, tente novamente")
 }
 
+fun tabuleiroDefinido() = tabuleiroHumano.isNotEmpty() && tabuleiroComputador.isNotEmpty()
+
 fun main() {
     var menuAtual: Int? = menuPrincipal()
-    var tabuleiroDefinido = false
     while (true) {
         menuAtual = readln().toIntOrNull()
         menuAtual = when (menuAtual) {
             1 -> menuDefinirTabuleiro()
-            2 -> menuJogar(tabuleiroDefinido)
-            3 -> menuGravarJogo(tabuleiroDefinido)
+            2 -> menuJogar(tabuleiroDefinido())
+            3 -> menuGravarJogo(tabuleiroDefinido())
             4 -> menuLerJogo()
             0 -> return
             else -> opcaoInvalida()
         }
         if (menuAtual == SUCCESS || menuAtual == REDIRECTED) {
-            if (menuAtual == SUCCESS) {
-                tabuleiroDefinido = true
-            }
             menuPrincipal()
         }
     }
