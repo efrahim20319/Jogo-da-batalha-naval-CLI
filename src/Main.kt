@@ -95,6 +95,13 @@ fun criaTabuleiroVazio(numLinhas: Int, numColunas: Int) = Array(numLinhas) { arr
 
 fun coordenadaContida(tabuleiro: Array<Array<Char?>>, numLinhas: Int, numColunas: Int): Boolean {
     val dimensao = tabuleiro.size
+
+    if (numLinhas == 1 && numColunas == 1 || numLinhas == 1 && numColunas ==dimensao) {
+        return false
+    }
+    if (numLinhas == dimensao && numColunas == 1 || numLinhas == dimensao && numColunas ==dimensao) {
+        return false
+    }
     return (numLinhas >= 1 && numColunas >= 1) && (numLinhas <= dimensao && numColunas <= dimensao)
 }
 
@@ -472,6 +479,11 @@ fun venceu(tabuleiro: Array<Array<Char?>>): Boolean {
     val dimensaoTabuleiro = tabuleiro.size
     val numNavios = calculaNumNavios(dimensaoTabuleiro, dimensaoTabuleiro)
     for (index in 0 until numNavios.size) {
+        if (dimensaoTabuleiro == 4 && index == 0) {
+            if (contarNaviosDeDimensao(tabuleiro, index+1) > 0) {
+                return true
+            }
+        }
         if (contarNaviosDeDimensao(tabuleiro, index + 1) != numNavios[index]) {
             return false
         }
@@ -917,7 +929,10 @@ fun main() {
             2 -> menuJogar(tabuleiroDefinido())
             3 -> menuGravarJogo(tabuleiroDefinido())
             4 -> menuLerJogo()
-            0 -> return
+            0,9 -> {
+                println("Vou sair")
+                return
+            }
             else -> opcaoInvalida()
         }
         if (menuAtual == 200 || menuAtual == 300) {
